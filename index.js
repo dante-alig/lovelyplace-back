@@ -379,7 +379,7 @@ app.get("/filterCategories", async (req, res) => {
 
 app.get("/filter-nearby", async (req, res) => {
   try {
-    const { address, maxDistance, placeCategory } = req.query; // Utilisation de req.query au lieu de req.body
+    const { address, maxDistance, placeCategory, typeOfSeason } = req.query; // Utilisation de req.query au lieu de req.body
 
     if (!address) {
       return res.status(400).json({ error: "Adresse manquante." });
@@ -426,8 +426,22 @@ app.get("/filter-nearby", async (req, res) => {
     // Géocodez l'adresse de l'utilisateur
     const { lat: userLat, lng: userLng } = await geocodeAddress(address);
 
-    // Récupérez les données filtrées par placeCategory
-    const locations = await Location.find({ placeCategory });
+    const selecFilters = {};
+    if (placeCategory) selecFilters.placeCategory = placeCategory;
+    // if (typeOfSeason) {
+    //   // Convertir la chaîne des filtres en tableau et rechercher les correspondances dans le tableau "filters" des documents
+    //   selecFilters.typeOfSeason = {
+    //     filters: {
+    //       $elemMatch: { $regex: `/^Type d’espace:${typeOfSeason}$/` },
+    //     },
+    //   };
+    // }
+
+    // Passez selecFilters directement sans envelopper
+    const locations = await Location.find(selecFilters);
+    console.log("locations", locations);
+    console.log("selecFilters", selecFilters);
+    console.log("typeOfSeason", typeOfSeason);
 
     // Géocodez chaque adresse et calculez la distance
     const nearbyLocations = [];
